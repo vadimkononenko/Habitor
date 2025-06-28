@@ -30,7 +30,6 @@ extension Habit {
     @NSManaged public var updatedAt: Date?
     @NSManaged public var categories: NSSet?
     @NSManaged public var entries: NSSet?
-    @NSManaged public var user: User?
 
 }
 
