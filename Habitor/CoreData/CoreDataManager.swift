@@ -1,5 +1,5 @@
 //
-//  CoreDataStack.swift
+//  CoreDataManager.swift
 //  Habitor
 //
 //  Created by Vadim Kononenko on 26.06.2025.
@@ -8,10 +8,8 @@
 import Foundation
 import CoreData
 
-class CoreDataStack {
-    static let shared = CoreDataStack()
-    
-    private init() {}
+class CoreDataManager {
+    static let shared = CoreDataManager()
     
     lazy var persistentContainer: NSPersistentContainer = {
         let container = NSPersistentContainer(name: "Habitor")
@@ -24,16 +22,16 @@ class CoreDataStack {
         return container
     }()
     
-    var context: NSManagedObjectContext {
+    var viewContext: NSManagedObjectContext {
         return persistentContainer.viewContext
     }
     
+    private init() {}
+    
     func save() {
-        let context = persistentContainer.viewContext
-        
-        if context.hasChanges {
+        if viewContext.hasChanges {
             do {
-                try context.save()
+                try viewContext.save()
             } catch {
                 print("Save error: \(error)")
             }

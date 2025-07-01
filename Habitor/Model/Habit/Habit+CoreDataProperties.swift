@@ -28,9 +28,32 @@ extension Habit {
     @NSManaged public var title: String?
     @NSManaged public var totalCompletions: Int32
     @NSManaged public var updatedAt: Date?
-    @NSManaged public var categories: NSSet?
-    @NSManaged public var entries: NSSet?
+    @NSManaged public var categories: Set<Category>?
+    @NSManaged public var entries: Set<HabitEntry>?
 
+}
+
+extension Habit {
+    var targetDays: [Int] {
+        get {
+            guard let data = targetDaysData else { return [] }
+            
+            do {
+                return try JSONDecoder().decode([Int].self, from: data)
+            } catch {
+                print("Error decoding targetDays JSON: \(error)")
+                return []
+            }
+        }
+        set {
+            do {
+                let data = try JSONEncoder().encode(newValue)
+                self.targetDaysData = data
+            } catch {
+                print("Error encoding targetDays JSON: \(error)")
+            }
+        }
+    }
 }
 
 // MARK: Generated accessors for categories

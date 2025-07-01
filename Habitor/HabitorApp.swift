@@ -11,12 +11,12 @@ import SwiftUI
 struct HabitorApp: App {
     @Environment(\.scenePhase) var scenePhase
     
-    let persistenceController = CoreDataStack.shared
+    let persistenceController = CoreDataManager.shared
     
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environment(\.managedObjectContext, persistenceController.context)
+                .environment(\.managedObjectContext, persistenceController.viewContext)
         }
         .onChange(of: scenePhase) { _, _ in
             persistenceController.save()

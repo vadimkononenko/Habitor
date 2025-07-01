@@ -20,7 +20,7 @@ extension Category {
     @NSManaged public var createdAt: Date?
     @NSManaged public var id: UUID?
     @NSManaged public var name: String?
-    @NSManaged public var habits: NSSet?
+    @NSManaged public var habits: Set<Habit>?
 
 }
 
