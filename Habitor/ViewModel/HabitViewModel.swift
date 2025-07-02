@@ -19,11 +19,43 @@ class HabitViewModel: ObservableObject {
     }
     
     var revardedEnergy: Int {
-        return 0
+        var revardedEnergy = 0
+        
+        habits.forEach { habit in
+            guard let entries = habit.entries else { return }
+            
+            let todayEntry = entries.filter({ $0.date == Date() })
+            revardedEnergy += Int(todayEntry.first?.energyEarned ?? 0)
+        }
+        
+        return revardedEnergy
+    }
+    
+    var completedHabitsCount: Int {
+        var completedHabitsCount = 0
+        habits.forEach { habit in
+            guard let entries = habit.entries else { return }
+            
+            if entries.filter({ $0.date == Date() }).count > 0 {
+                completedHabitsCount += 1
+            }
+        }
+        
+        return completedHabitsCount
     }
     
     var percentComplete: Int {
-        return 0
+        var entriesCount = 0
+        habits.forEach { habit in
+            guard
+                let entries = habit.entries,
+                entries.contains(where: { $0.date == Date() })
+            else { return }
+            
+            entriesCount += 1
+        }
+        
+        return habitsCount == 0 ? 0 : (entriesCount / habits.count) * 100
     }
     
     init(coreDataManager: CoreDataManager) {

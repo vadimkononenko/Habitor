@@ -12,10 +12,10 @@ struct ContentView: View {
         ScrollView(.vertical,
                    showsIndicators: false) {
             VStack {
-                HeadrerProgressView(allHabitsCount: 5,
-                                    currentCompletedHabitsCount: 3,
-                                    allEnergyCount: 20,
-                                    currentEnergyCount: 5)
+                HeadrerProgressView(habitsCount: 5,
+                                    completedHabitsCount: 3,
+                                    revardedEnergyCount: 20,
+                                    progress: 5)
                     .padding()
                 
                 

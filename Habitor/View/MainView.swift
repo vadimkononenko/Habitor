@@ -14,10 +14,10 @@ struct MainView: View {
         ScrollView(.vertical,
                    showsIndicators: false) {
             VStack {
-                HeadrerProgressView(allHabitsCount: 5,
-                                    currentCompletedHabitsCount: 3,
-                                    allEnergyCount: 20,
-                                    currentEnergyCount: 5)
+                HeadrerProgressView(habitsCount: viewModel.habitsCount,
+                                    completedHabitsCount: viewModel.completedHabitsCount,
+                                    revardedEnergyCount: viewModel.revardedEnergy,
+                                    progress: viewModel.percentComplete)
                 .padding()
                 
                 
@@ -41,4 +41,5 @@ struct MainView: View {
 
 #Preview {
     MainView()
+        .environmentObject(HabitViewModel(coreDataManager: CoreDataManager.shared))
 }

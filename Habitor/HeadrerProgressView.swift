@@ -11,25 +11,18 @@ struct HeadrerProgressView: View {
     
     // MARK: - Params
     
-    var allHabitsCount: Int
-    var currentCompletedHabitsCount: Int
-    var allEnergyCount: Int
-    var currentEnergyCount: Int
-    
-    var progress: Double {
-        Double(currentCompletedHabitsCount) / Double(allHabitsCount)
-    }
+    var habitsCount: Int
+    var revardedEnergyCount: Int
+    var completedHabitsCount: Int
+    var progress: Int
     
     // MARK: - Init
     
-    init(allHabitsCount: Int,
-         currentCompletedHabitsCount: Int,
-         allEnergyCount: Int,
-         currentEnergyCount: Int) {
-        self.allHabitsCount = allHabitsCount
-        self.currentCompletedHabitsCount = currentCompletedHabitsCount
-        self.allEnergyCount = allEnergyCount
-        self.currentEnergyCount = currentEnergyCount
+    init(habitsCount: Int, completedHabitsCount: Int, revardedEnergyCount: Int, progress: Int) {
+        self.habitsCount = habitsCount
+        self.completedHabitsCount = completedHabitsCount
+        self.revardedEnergyCount = revardedEnergyCount
+        self.progress = progress
     }
     
     // MARK: - Body View
@@ -40,13 +33,13 @@ struct HeadrerProgressView: View {
                 Text("You are almost done!")
                     
                 HStack(spacing: 30) {
-                    ParamProgressView(allCount: allHabitsCount,
-                                      currentCompletedCount: currentCompletedHabitsCount,
+                    ParamProgressView(allCount: habitsCount,
+                                      currentCompletedCount: completedHabitsCount,
                                       title: "Habits")
                     
-                    ParamProgressView(allCount: allEnergyCount,
-                                      currentCompletedCount: currentEnergyCount,
-                                      title: "Energy")
+//                    ParamProgressView(allCount: allEnergyCount,
+//                                      currentCompletedCount: currentEnergyCount,
+//                                      title: "Energy")
                 }
                 .padding(.top)
             }
@@ -76,7 +69,7 @@ struct HeadrerProgressView: View {
                             .degrees(-90)
                         )
                                 
-                    Text("\(Int(progress * 100))%")
+                    Text("\(progress)%")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundColor(.primary)
                 }
@@ -87,9 +80,5 @@ struct HeadrerProgressView: View {
 }
 
 #Preview {
-    HeadrerProgressView(
-        allHabitsCount: 5,
-        currentCompletedHabitsCount: 3,
-        allEnergyCount: 20,
-        currentEnergyCount: 5)
+    HeadrerProgressView(habitsCount: 5, completedHabitsCount: 3, revardedEnergyCount: 10, progress: 60)
 }
