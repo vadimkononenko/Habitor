@@ -7,103 +7,140 @@
 
 import SwiftUI
 
-/*
- 1) 3 часа на практику создания приложений
- 2) 1 час на практику решения алгоритмических задач
- 3) 1.5 часа английского
- 
- просто я уже понимаю, что уже не вывожу эту нагрузку
- мне нужно перезагрузка + перемены в лучшую сторону, бо я прийду к тому же самому и тупо не смогу уже вывезти
- поменять сферу на ту, которую действительно хочу и стремлюсь
- моя сейчас проблема что я боюсь рисковать
- однако в этом сейчас и заключается моя сила, чтоб у меня были силы стать намного лучше и сильнее для достижения
- поставленной цели
- */
-
 struct HabitCardView: View {
     
-    var title: String
-    var specs: [String]
-    var currentDate: Date
-    var energyCount: Int
-    var isCompleted: Bool = false
+    var habit: Habit
     
-    var formattedDate: String {
-        currentDate.formatted(date: .numeric, time: .omitted)
+    // MARK: - Computed Properties
+    var currentFormattedDate: String {
+        Date.now.formatted(date: .numeric, time: .omitted)
     }
+    
+    private var habitEntry: HabitEntry? {
+        getHabitEntry(for: habit, on: Date())
+    }
+    
+    private var isCompleted: Bool {
+        habitEntry?.isCompleted ?? false
+    }
+    
+    // MARK: - Colors
+    private let categoryBackgroundColor = Color(red: 0.5843137503, green: 0.8235294223, blue: 0.4196078479)
+    private let accentColor = Color(red: 1, green: 0.7066476341, blue: 0.3261104689)
+    private let borderColor = Color(red: 0.2549019754, green: 0.2745098174, blue: 0.3019607961)
     
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack {
-                Text(title)
-                
-                Spacer()
-                
-                Image(systemName: "ellipsis")
-            }
-            
-            HStack {
-                ForEach(specs, id: \.self) { spec in
-                    Text(spec)
-                        .padding(.vertical, 5)
-                        .padding(.horizontal, 12)
-                        .background(Color(#colorLiteral(red: 0.5843137503, green: 0.8235294223, blue: 0.4196078479, alpha: 1)))
-                        .cornerRadius(12)
-                        .font(.caption2)
-                }
-            }
-            
-            HStack(spacing: 40) {
-                HStack {
-                    Image(systemName: "calendar")
-                    
-                    Text(formattedDate)
-                }
-                .font(.footnote)
-                
-                HStack(spacing: 18) {
-                    RoundedRectangle(cornerRadius: 5)
-                        .fill(Color(#colorLiteral(red: 1, green: 0.7066476341, blue: 0.3261104689, alpha: 1)))
-                        .frame(height: 5)
-                        .frame(maxWidth: .infinity)
-                    
-                    Text("\(energyCount)⚡️")
-                }
-                .frame(maxWidth: .infinity)
-            }
-            
-            Button {
-                //action
-            } label: {
-                HStack {
-                    if isCompleted {
-                        Image(systemName: "checkmark")
-                            .foregroundColor(.green)
-                    }
-                    
-                    Text(isCompleted ? "Completed" : "Complete")
-                }
-                .foregroundColor(Color.white)
-                .font(.headline)
-                .fontWeight(.bold)
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 6)
-                .background(Color(#colorLiteral(red: 1, green: 0.7066476341, blue: 0.3261104689, alpha: 1)))
-                .cornerRadius(6)
-            }
-            .frame(maxWidth: .infinity)
+            headerView
+            categoriesView
+            infoView
+            completeButton
         }
         .padding()
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(Color(#colorLiteral(red: 0.2549019754, green: 0.2745098174, blue: 0.3019607961, alpha: 1)))
-        )
+        .background(cardBackground)
+    }
+    
+    // MARK: - Subviews
+    private var headerView: some View {
+        HStack {
+            Text(habit.title ?? "NOTITLE")
+            
+            Spacer()
+            
+            Image(systemName: "ellipsis")
+        }
+    }
+    
+    private var categoriesView: some View {
+        HStack {
+            ForEach(Array(habit.categories ?? []), id: \.id) { category in
+                categoryTag(for: category)
+            }
+        }
+    }
+    
+    private func categoryTag(for category: Category) -> some View {
+        Text(category.name ?? "")
+            .padding(.vertical, 5)
+            .padding(.horizontal, 12)
+            .background(categoryBackgroundColor)
+            .cornerRadius(12)
+            .font(.caption2)
+    }
+    
+    private var infoView: some View {
+        HStack(spacing: 40) {
+            dateView
+            energyView
+        }
+    }
+    
+    private var dateView: some View {
+        HStack {
+            Image(systemName: "calendar")
+            Text(currentFormattedDate)
+        }
+        .font(.footnote)
+    }
+    
+    private var energyView: some View {
+        HStack(spacing: 18) {
+            energyBar
+            energyText
+        }
+        .frame(maxWidth: .infinity)
+    }
+    
+    private var energyBar: some View {
+        RoundedRectangle(cornerRadius: 5)
+            .fill(accentColor)
+            .frame(height: 5)
+            .frame(maxWidth: .infinity)
+    }
+    
+    private var energyText: some View {
+        Text("\(habitEntry?.energyEarned ?? 0)⚡️")
+    }
+    
+    private var completeButton: some View {
+        Button {
+            // action
+        } label: {
+            buttonLabel
+        }
+        .frame(maxWidth: .infinity)
+    }
+    
+    private var buttonLabel: some View {
+        HStack {
+            if isCompleted {
+                Image(systemName: "checkmark")
+                    .foregroundColor(.green)
+            }
+            
+            Text(isCompleted ? "Completed" : "Complete")
+        }
+        .foregroundColor(.white)
+        .font(.headline)
+        .fontWeight(.bold)
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 6)
+        .background(accentColor)
+        .cornerRadius(6)
+    }
+    
+    private var cardBackground: some View {
+        RoundedRectangle(cornerRadius: 12)
+            .stroke(borderColor)
+    }
+    
+    // MARK: - Helper Methods
+    func getHabitEntry(for habit: Habit, on date: Date) -> HabitEntry? {
+        habit.entries?.first(where: { $0.date == date })
     }
 }
 
-#Preview {
-    HabitCardView(title: "Do pushpamps after fulltime job",
-                  specs: ["Self-improvment", "Work"],
-                  currentDate: Date.now,
-                  energyCount: 5)
-}
+//#Preview {
+//    let viewModel = HabitViewModel(coreDataManager: CoreDataManager.shared)
+//    HabitCardView(habit: viewModel.habits.fir)
+//}

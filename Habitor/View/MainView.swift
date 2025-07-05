@@ -20,26 +20,23 @@ struct MainView: View {
                                     progress: viewModel.percentComplete)
                 .padding()
                 
-                
-                
-                HabitCardView(title: "Do pushpamps after fulltime job",
-                              specs: ["Self-improvment", "Work"],
-                              currentDate: Date.now,
-                              energyCount: 5)
-                HabitCardView(title: "Study english in the evening",
-                              specs: ["English"],
-                              currentDate: Calendar.current
-                    .date(byAdding: .day, value: -2, to: Date.now)!,
-                              energyCount: 10)
-                
-                Spacer()
+                ForEach(viewModel.habits, id: \.self) { habit in
+                    HabitCardView(habit: habit)
+                    
+                    Spacer()
+                }
+                .padding()
             }
-            .padding()
+            .onAppear {
+                viewModel.fetchHabits()
+            }
         }
     }
 }
 
 #Preview {
     MainView()
-        .environmentObject(HabitViewModel(coreDataManager: CoreDataManager.shared))
+        .environmentObject(
+            HabitViewModel(coreDataManager: CoreDataManager.shared)
+        )
 }

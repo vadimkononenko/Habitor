@@ -11,11 +11,14 @@ import SwiftUI
 struct HabitorApp: App {
     @Environment(\.scenePhase) var scenePhase
     
+    @StateObject private var habitViewModel = HabitViewModel(coreDataManager: CoreDataManager.shared)
+    
     let persistenceController = CoreDataManager.shared
     
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainView()
+                .environmentObject(habitViewModel)
                 .environment(\.managedObjectContext, persistenceController.viewContext)
         }
         .onChange(of: scenePhase) { _, _ in
