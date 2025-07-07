@@ -24,31 +24,57 @@ struct HabitCardView: View {
         habitEntry?.isCompleted ?? false
     }
     
-    // MARK: - Colors
-    private let categoryBackgroundColor = Color(red: 0.5843137503, green: 0.8235294223, blue: 0.4196078479)
-    private let accentColor = Color(red: 1, green: 0.7066476341, blue: 0.3261104689)
-    private let borderColor = Color(red: 0.2549019754, green: 0.2745098174, blue: 0.3019607961)
+    private func getCategotyTagColor(for category: Category) -> Color {
+        Color(hex: category.colorHex ?? "FFFFFF") ?? .white
+    }
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            headerView
-            categoriesView
-            infoView
-            completeButton
+        HStack(alignment: .top) {
+            VStack(alignment: .leading) {
+                headerView
+                
+                HStack(spacing: 20) {
+                    ForEach(0..<7) { item in
+                        VStack {
+                            Text("\(item + 1)")
+                                .font(.caption2)
+                            
+                            RoundedRectangle(cornerRadius: 4)
+                                .frame(width: 16, height: 16)
+                                .background(Color.gray)
+                        }
+                    }
+                }
+                .padding(.top, 8)
+            }
+            
+            Spacer()
+            
+            Button {
+                //action
+            } label: {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 6)
+                        .stroke(Color(#colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)))
+                    
+                    Image(systemName: "checkmark")
+                        .fontWeight(.bold)
+                }
+            }
+            .frame(width: 40, height: 40)
+
         }
+        .frame(maxWidth: .infinity)
         .padding()
-        .background(cardBackground)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .stroke(Color(#colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)))
+        )
     }
     
     // MARK: - Subviews
     private var headerView: some View {
-        HStack {
-            Text(habit.title ?? "NOTITLE")
-            
-            Spacer()
-            
-            Image(systemName: "ellipsis")
-        }
+        Text(habit.title ?? "NOTITLE")
     }
     
     private var categoriesView: some View {
@@ -61,80 +87,74 @@ struct HabitCardView: View {
     
     private func categoryTag(for category: Category) -> some View {
         Text(category.name ?? "")
-            .padding(.vertical, 5)
-            .padding(.horizontal, 12)
-            .background(categoryBackgroundColor)
+            .padding(.vertical, 3)
+            .padding(.horizontal, 10)
+            .background(getCategotyTagColor(for: category))
             .cornerRadius(12)
             .font(.caption2)
     }
     
     private var infoView: some View {
         HStack(spacing: 40) {
-            dateView
+            HStack {
+                Image(systemName: "calendar")
+                Text(currentFormattedDate)
+            }
+            .font(.footnote)
+            
             energyView
         }
     }
     
-    private var dateView: some View {
-        HStack {
-            Image(systemName: "calendar")
-            Text(currentFormattedDate)
-        }
-        .font(.footnote)
-    }
-    
     private var energyView: some View {
-        HStack(spacing: 18) {
-            energyBar
-            energyText
-        }
-        .frame(maxWidth: .infinity)
+        Text("\(habitEntry?.energyEarned ?? 0) ")
+            .font(.title3)
+            .fontWeight(.bold)
+            .foregroundColor(Color.accentColor)
+        + Text("/ \(habit.energyReward)")
+            .font(.caption)
+        + Text("⚡️")
+            .font(.caption)
     }
     
     private var energyBar: some View {
         RoundedRectangle(cornerRadius: 5)
-            .fill(accentColor)
+            .fill(Color.accentColor)
             .frame(height: 5)
             .frame(maxWidth: .infinity)
     }
     
-    private var energyText: some View {
-        Text("\(habitEntry?.energyEarned ?? 0)⚡️")
-    }
-    
     private var completeButton: some View {
-        Button {
-            // action
-        } label: {
-            buttonLabel
+        HStack {
+            energyView
+                .frame(maxWidth: .infinity)
+            
+            Button {
+                // action
+            } label: {
+                buttonLabel
+            }
+            .padding()
         }
-        .frame(maxWidth: .infinity)
     }
     
     private var buttonLabel: some View {
         HStack {
-            if isCompleted {
-                Image(systemName: "checkmark")
-                    .foregroundColor(.green)
-            }
-            
-            Text(isCompleted ? "Completed" : "Complete")
+            Image(systemName: "checkmark")
         }
         .foregroundColor(.white)
         .font(.headline)
         .fontWeight(.bold)
         .frame(maxWidth: .infinity)
         .padding(.vertical, 6)
-        .background(accentColor)
+        .background(isCompleted ? Color.green : Color(#colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)))
+//        .background(Color.accentColor)
         .cornerRadius(6)
     }
-    
-    private var cardBackground: some View {
-        RoundedRectangle(cornerRadius: 12)
-            .stroke(borderColor)
-    }
-    
-    // MARK: - Helper Methods
+}
+
+// MARK: - Helper Methods
+extension HabitCardView {
     func getHabitEntry(for habit: Habit, on date: Date) -> HabitEntry? {
         habit.entries?.first(where: { $0.date == date })
     }

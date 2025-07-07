@@ -22,10 +22,8 @@ struct MainView: View {
                 
                 ForEach(viewModel.habits, id: \.self) { habit in
                     HabitCardView(habit: habit)
-                    
-                    Spacer()
                 }
-                .padding()
+                .padding(.horizontal)
             }
             .onAppear {
                 viewModel.fetchHabits()
