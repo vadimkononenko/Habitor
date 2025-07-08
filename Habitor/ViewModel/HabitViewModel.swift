@@ -26,6 +26,12 @@ extension HabitViewModel {
         return habits.count
     }
     
+    var totalEnergyCount: Int {
+        return Int(habits.reduce(0) { partialResult, habit in
+            habit.energyReward + partialResult
+        })
+    }
+    
     var revardedEnergy: Int {
         var revardedEnergy = 0
         

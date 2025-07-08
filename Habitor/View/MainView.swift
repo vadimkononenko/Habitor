@@ -15,6 +15,7 @@ struct MainView: View {
                    showsIndicators: false) {
             VStack {
                 HeadrerProgressView(habitsCount: viewModel.habitsCount,
+                                    energyCount: viewModel.totalEnergyCount,
                                     completedHabitsCount: viewModel.completedHabitsCount,
                                     revardedEnergyCount: viewModel.revardedEnergy,
                                     progress: viewModel.percentComplete)

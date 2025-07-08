@@ -31,7 +31,7 @@ struct HabitCardView: View {
     var body: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading) {
-                headerView
+                Text(habit.title ?? "NOTITLE")
                 
                 HStack(spacing: 20) {
                     ForEach(0..<7) { item in
@@ -73,10 +73,6 @@ struct HabitCardView: View {
     }
     
     // MARK: - Subviews
-    private var headerView: some View {
-        Text(habit.title ?? "NOTITLE")
-    }
-    
     private var categoriesView: some View {
         HStack {
             ForEach(Array(habit.categories ?? []), id: \.id) { category in
@@ -148,8 +144,29 @@ struct HabitCardView: View {
         .frame(maxWidth: .infinity)
         .padding(.vertical, 6)
         .background(isCompleted ? Color.green : Color(#colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)))
-//        .background(Color.accentColor)
         .cornerRadius(6)
+    }
+}
+
+// MARK: - Views
+extension HabitCardView {
+    @ViewBuilder
+    func createCategoriesView() -> some View {
+        HStack {
+            ForEach(Array(habit.categories ?? []), id: \.id) { category in
+                categoryTag(for: category)
+            }
+        }
+    }
+    
+    @ViewBuilder
+    func createCategoryTag(for category: Category) -> some View {
+        Text(category.name ?? "")
+            .padding(.vertical, 3)
+            .padding(.horizontal, 10)
+            .background(getCategotyTagColor(for: category))
+            .cornerRadius(12)
+            .font(.caption2)
     }
 }
 
