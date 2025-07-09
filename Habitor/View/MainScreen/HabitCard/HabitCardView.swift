@@ -8,11 +8,27 @@
 import SwiftUI
 
 struct HabitCardView: View {
+    @EnvironmentObject private var viewModel: HabitViewModel
     
     var habit: Habit
     
     var currentFormattedDate: String {
         Date.now.formatted(date: .numeric, time: .omitted)
+    }
+    
+    var todayHabitEntry: HabitEntry? {
+        guard let entries = habit.entries else { return nil }
+        
+        let today = Date()
+        
+        return entries.first { entry in
+            guard let entryDate = entry.date else { return false }
+            return Calendar.current.isDate(entryDate, inSameDayAs: today)
+        }
+    }
+    
+    var isCompletedToday: Bool {
+        todayHabitEntry?.isCompleted ?? false
     }
     
     var body: some View {
@@ -76,14 +92,16 @@ extension HabitCardView {
     @ViewBuilder
     private func createCompletionButton() -> some View {
         Button {
-            //action
+            handleCompletionToday()
         } label: {
             ZStack {
                 RoundedRectangle(cornerRadius: 6)
-                    .stroke(Color(#colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)))
+                    .stroke(isCompletedToday ? Color(#colorLiteral(red: 0.3411764801, green: 0.6235294342, blue: 0.1686274558, alpha: 1)) : Color(#colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)))
+                    .fill(isCompletedToday ? Color(#colorLiteral(red: 0.9315781799, green: 0.9315781799, blue: 0.9315781799, alpha: 1)) : Color.white)
                 
                 Image(systemName: "checkmark")
                     .fontWeight(.bold)
+                    .foregroundColor(isCompletedToday ? Color.green : Color.accentColor)
             }
         }
         .frame(width: 40, height: 40)
@@ -92,6 +110,15 @@ extension HabitCardView {
 
 // MARK: - Helper Methods
 extension HabitCardView {
+    func handleCompletionToday() {
+        guard let entry = todayHabitEntry else {
+            viewModel.createHabitEntry(for: habit)
+            return
+        }
+        
+        viewModel.deleteHabitEntry(entry)
+    }
+    
     func getHabitEntry(for habit: Habit, on date: Date) -> HabitEntry? {
         habit.entries?.first(where: { $0.date == date })
     }

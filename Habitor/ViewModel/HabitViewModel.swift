@@ -123,8 +123,40 @@ extension HabitViewModel {
     }
     
     // MARK: - HabitEntry
-    func createHabitEntry() {
-        //TODO: finish creation of habit entry
+    func createHabitEntry(for habit: Habit,
+                          with note: String? = nil,
+                          on date: Date = Date()) {
+        let habitEntry = HabitEntry(context: coreDataManager.viewContext)
+        
+        habitEntry.id = UUID()
+        habitEntry.date = date
+        habitEntry.completedAt = Date()
+        habitEntry.isCompleted = true
+        habitEntry.energyEarned = habit.energyReward
+        
+        if let note = note {
+            habitEntry.notes = note
+        }
+        
+        habit.addToEntries(habitEntry)
+        
+        coreDataManager.save()
+        
+        print("--------- HABIT ENTRY CREATED")
+        
+        fetchHabits()
+    }
+    
+    func deleteHabitEntry(_ habitEntry: HabitEntry) {
+        guard let habit = habitEntry.habit else { return }
+            
+        habit.removeFromEntries(habitEntry)
+        
+        coreDataManager.viewContext.delete(habitEntry)
+        
+        coreDataManager.save()
+        
+        fetchHabits()
     }
     
     // MARK: - Category

@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct CompletionListView: View {
-    var habit: Habit
+    @ObservedObject var habit: Habit
     
     var body: some View {
         HStack(spacing: 16) {
@@ -59,10 +59,11 @@ extension CompletionListView {
     }
     
     private func isCompletedDay(_ date: Date) -> Bool {
-        if let entry = habit.entries?.first(where: { $0.date == date }) {
-            return entry.isCompleted
-        }
+        guard let entries = habit.entries else { return false }
         
-        return false
+        return entries.first { entry in
+            guard let entryDate = entry.date else { return false }
+            return Calendar.current.isDate(entryDate, inSameDayAs: date)
+        }?.isCompleted ?? false
     }
 }
