@@ -9,18 +9,6 @@ import SwiftUI
 
 struct ProfileView: View {
     
-    var weeklyData: [ChartData] {
-        [
-            ChartData(label: "Пн", value: 80),
-            ChartData(label: "Вт", value: 90),
-            ChartData(label: "Ср", value: 60),
-            ChartData(label: "Чт", value: 100),
-            ChartData(label: "Пт", value: 70),
-            ChartData(label: "Сб", value: 85),
-            ChartData(label: "Вс", value: 95)
-        ]
-    }
-    
     var body: some View {
         ScrollView(.vertical, showsIndicators: false) {
             VStack {
@@ -41,8 +29,6 @@ struct ProfileView: View {
                     .fontWeight(.bold)
                 
                 HabitCalendarView()
-                
-                ProgressChart(data: weeklyData)
             }
         }
     }

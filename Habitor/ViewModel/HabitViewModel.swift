@@ -142,8 +142,6 @@ extension HabitViewModel {
         
         coreDataManager.save()
         
-        print("--------- HABIT ENTRY CREATED")
-        
         fetchHabits()
     }
     
