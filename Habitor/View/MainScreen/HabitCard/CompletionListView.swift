@@ -13,7 +13,9 @@ struct CompletionListView: View {
     var body: some View {
         HStack(spacing: 16) {
             ForEach(-6..<1) { dayOffset in
-                createCompletionItem(dayOffset: dayOffset)
+                CompletionItemView(habit: habit,
+                                   date: getDateDaysAgo(dayOffset),
+                                   isCompleted: isCompletedDay(getDateDaysAgo(dayOffset)))
             }
         }
     }

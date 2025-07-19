@@ -20,62 +20,27 @@ class HabitViewModel: ObservableObject {
     }
 }
 
-// MARK: - Variables
-extension HabitViewModel {
-    var habitsCount: Int {
-        return habits.count
-    }
-    
-    var totalEnergyCount: Int {
-        return Int(habits.reduce(0) { partialResult, habit in
-            habit.energyReward + partialResult
-        })
-    }
-    
-    var revardedEnergy: Int {
-        var revardedEnergy = 0
-        
-        habits.forEach { habit in
-            guard let entries = habit.entries else { return }
-            
-            let todayEntry = entries.filter({ $0.date == Date() })
-            revardedEnergy += Int(todayEntry.first?.energyEarned ?? 0)
-        }
-        
-        return revardedEnergy
-    }
-    
-    var completedHabitsCount: Int {
-        var completedHabitsCount = 0
-        habits.forEach { habit in
-            guard let entries = habit.entries else { return }
-            
-            if entries.filter({ $0.date == Date() }).count > 0 {
-                completedHabitsCount += 1
-            }
-        }
-        
-        return completedHabitsCount
-    }
-    
-    var percentComplete: Int {
-        var entriesCount = 0
-        habits.forEach { habit in
-            guard
-                let entries = habit.entries,
-                entries.contains(where: { $0.date == Date() })
-            else { return }
-            
-            entriesCount += 1
-        }
-        
-        return habitsCount == 0 ? 0 : (entriesCount / habits.count) * 100
-    }
-}
-
 // MARK: - Methods
 extension HabitViewModel {
+    func getHabitEntry(for habit: Habit, on date: Date) -> HabitEntry? {
+        guard let entries = habit.entries else { return nil }
+        
+        return entries.first { entry in
+            guard let entryDate = entry.date else { return false }
+            return Calendar.current.isDate(entryDate, inSameDayAs: date)
+        }
+    }
     
+    func completeHabitEntry(for habit: Habit, on date: Date) {
+        let habitEntry = getHabitEntry(for: habit, on: date)
+        
+        guard let habitEntry else {
+            createHabitEntry(for: habit, on: date)
+            return
+        }
+        
+        deleteHabitEntry(habitEntry)
+    }
 }
 
 // MARK: - CoreData CRUD
