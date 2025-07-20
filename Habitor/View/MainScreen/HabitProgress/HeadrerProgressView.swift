@@ -35,13 +35,15 @@ struct HeadrerProgressView: View {
     
     var body: some View {
         HStack(alignment: .top, spacing: 60) {
-            HStack(spacing: 30) {
+            HStack {
                 ParamProgressView(allCount: habitsCount,
                                   currentCompletedCount: completedHabitsCount,
                                   title: "Habits")
+                .frame(width: 60)
                 ParamProgressView(allCount: energyCount,
                                   currentCompletedCount: revardedEnergyCount,
                                   title: "Energy")
+                .frame(width: 60)
             }
             .padding(.top)
             
