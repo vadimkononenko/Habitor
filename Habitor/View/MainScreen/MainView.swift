@@ -7,9 +7,16 @@
 
 import SwiftUI
 
+enum NavigationDestination: Hashable {
+    case habitCreation
+    case habitDetail(Habit)
+}
+
 struct MainView: View {
     @Environment(\.managedObjectContext) private var viewContext
     @EnvironmentObject private var viewModel: HabitViewModel
+    
+    @State private var navigationPath = NavigationPath()
     
     @FetchRequest(
         sortDescriptors: [
@@ -20,8 +27,7 @@ struct MainView: View {
     ) private var habits: FetchedResults<Habit>
     
     var body: some View {
-        ScrollView(.vertical,
-                   showsIndicators: false) {
+        NavigationStack(path: $navigationPath) {
             VStack {
                 HeadrerProgressView(habitsCount: habits.count,
                                     energyCount: totalEnergyCount,
@@ -30,10 +36,42 @@ struct MainView: View {
                                     progress: percentComplete)
                 .padding()
                 
-                ForEach(habits, id: \.self) { habit in
-                    HabitCardView(habit: habit)
+                ScrollView(.vertical,
+                           showsIndicators: false) {
+                    ForEach(habits, id: \.self) { habit in
+                        HabitCardView(habit: habit)
+                    }
+                    .padding(.horizontal)
+                    
+                    Button {
+                        navigationPath.append(NavigationDestination.habitCreation)
+                    } label: {
+                        HStack {
+                            Image(systemName: "plus.circle")
+                            
+                            Text("New habit")
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(Color(#colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)))
+                        )
+                    }
+                    .frame(maxHeight: .infinity, alignment: .top)
+                    .padding(.horizontal)
                 }
-                .padding(.horizontal)
+            }
+            .navigationDestination(for: NavigationDestination.self) { destination in
+                switch destination {
+                case .habitCreation:
+                    HabitCreationView()
+                        .environment(\.managedObjectContext, viewContext)
+                        .environmentObject(viewModel)
+                                    
+                case .habitDetail(let habit):
+                    Text("Detail")
+                }
             }
         }
     }
