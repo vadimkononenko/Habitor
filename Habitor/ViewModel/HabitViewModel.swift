@@ -77,6 +77,37 @@ extension HabitViewModel {
         return habit
     }
     
+    func createHabit(title: String,
+                     descriptionText: String,
+                     targetDays: [Int] = [1,2,3,4,5,6,7],
+                     categories: [Category]? = nil) -> Habit {
+        let habit = Habit(context: coreDataManager.viewContext)
+        
+        habit.id = UUID()
+        habit.title = title
+        habit.descriptionText = descriptionText
+        habit.targetDays = targetDays
+        habit.bestStreak = 0
+        habit.currentStreak = 0
+        habit.isActive = true
+        habit.energyReward = 5
+        habit.totalCompletions = 0
+        habit.createdAt = Date()
+        habit.updatedAt = Date()
+        
+        if let categories = categories {
+            categories.forEach {
+                habit.addToCategories($0)
+            }
+        }
+        
+        coreDataManager.save()
+        
+        fetchHabits()
+        
+        return habit
+    }
+    
     func fetchHabits() {
         let request = NSFetchRequest<Habit>(entityName: "Habit")
         

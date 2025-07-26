@@ -14,6 +14,10 @@ struct CategorySectionRowView: View {
         
     var body: some View {
         HStack {
+            Circle()
+                .fill(category.color)
+                .frame(width: 20, height: 20)
+            
             Text(category.name ?? "Untitled")
                 
             Spacer()

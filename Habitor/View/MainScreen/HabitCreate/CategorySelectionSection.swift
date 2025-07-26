@@ -6,10 +6,11 @@
 //
 
 import SwiftUI
+import CoreData
 
 struct CategorySelectionSection: View {
     let categories: [Category]
-    @Binding var selectedCategory: Category?
+    @Binding var selectedCategoryIDs: [NSManagedObjectID]
         
     var body: some View {
         Section("Categories") {
@@ -21,12 +22,20 @@ struct CategorySelectionSection: View {
                 ForEach(categories, id: \.objectID) { category in
                     CategorySectionRowView(
                         category: category,
-                        isSelected: selectedCategory == category
+                        isSelected: selectedCategoryIDs.contains(category.objectID)
                     ) {
-                        selectedCategory = selectedCategory == category ? nil : category
+                        toggleCategorySelection(category)
                     }
                 }
             }
+        }
+    }
+    
+    private func toggleCategorySelection(_ category: Category) {
+        if let index = selectedCategoryIDs.firstIndex(of: category.objectID) {
+            selectedCategoryIDs.remove(at: index)
+        } else {
+            selectedCategoryIDs.append(category.objectID)
         }
     }
 }
