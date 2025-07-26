@@ -1,15 +1,27 @@
 //
-//  HabitCalendarView.swift
+//  StatisticView.swift
 //  Habitor
 //
-//  Created by Vadim Kononenko on 25.06.2025.
+//  Created by Vadim Kononenko on 23.06.2025.
 //
 
 import SwiftUI
 
-struct HabitCalendarView: View {
+struct StatisticView: View {
     @State private var selectedMonth = Date()
-        
+    
+    ///пройтись по всем habit
+    ///посчитать для каждого habit общее выполнение с учетом выбраной частоты выполнения
+    
+    @FetchRequest(
+        sortDescriptors: [NSSortDescriptor(keyPath: \Habit.createdAt, ascending: true)]
+    )
+    private var habits: FetchedResults<Habit>
+    
+//    private var completions: [Date: Bool] {
+//        
+//    }
+    
     // Моковые данные
     private var mockData: [Date: Bool] {
         var data: [Date: Bool] = [:]
@@ -28,29 +40,21 @@ struct HabitCalendarView: View {
             
         return data
     }
-        
+    
     var body: some View {
-        VStack(spacing: 16) {
-            // Статистика месяца
-            MonthStats(habitData: mockData, month: selectedMonth)
-            
-            // Навигация по месяцам
-            MonthNavigation(selectedMonth: $selectedMonth)
-                
-            // Календарная сетка
-            CalendarGrid(habitData: mockData, month: selectedMonth)
-                
-            // Легенда
-            Legend()
+        ScrollView(.vertical, showsIndicators: false) {
+            VStack(spacing: 16) {
+                MonthStats(habitData: mockData, month: selectedMonth)
+            }
+            .padding()
         }
-        .padding()
     }
-        
+    
     private func normalizeDate(_ date: Date) -> Date {
         Calendar.current.startOfDay(for: date)
     }
 }
 
 #Preview {
-    HabitCalendarView()
+    StatisticView()
 }

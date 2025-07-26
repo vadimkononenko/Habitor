@@ -8,9 +8,25 @@
 import SwiftUI
 
 struct MonthStats: View {
+    @FetchRequest(
+        sortDescriptors: [NSSortDescriptor(keyPath: \Habit.createdAt, ascending: true)]
+    ) private var habits: FetchedResults<Habit>
+    
     let habitData: [Date: Bool]
     let month: Date
+    
+    private var daysInMonth: Int {
+        let calendar = Calendar.current
         
+        return calendar.range(
+            of: .day,
+            in: .month,
+            for: month
+        )?.count ?? 0
+    }
+    
+    
+    
     private var stats: (completed: Int, total: Int, percentage: Int) {
         let calendar = Calendar.current
         guard let monthInterval = calendar.dateInterval(of: .month, for: month) else {
@@ -68,8 +84,6 @@ struct MonthStats: View {
             }
         }
         .padding()
-        .background(Color(.systemGray6))
-        .cornerRadius(12)
     }
 }
 
