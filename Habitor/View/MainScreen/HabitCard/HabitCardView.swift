@@ -8,17 +8,28 @@
 import SwiftUI
 
 struct HabitCardView: View {
-    // MARK: - Environment
-    @EnvironmentObject private var viewModel: HabitViewModel
+
+    @EnvironmentObject private var habitViewModel: HabitViewModel
     @Environment(\.managedObjectContext) private var viewContext
     
     // MARK: - Properties
+    @StateObject private var viewModel: HabitCardViewModel
     let habit: Habit
+    
+    // MARK: - Init
+    init (habit: Habit) {
+        self.habit = habit
+        _viewModel = StateObject(
+            wrappedValue: HabitCardViewModel(habit: habit,
+                                             habitViewModel: HabitViewModel(coreDataManager: CoreDataManager.shared))
+        )
+    }
     
     // MARK: - Body
     var body: some View {
         VStack {
-            HabitCardHeaderView(habit: habit, isCompleted: isCompletedToday) {
+            HabitCardHeaderView(habit: habit,
+                                isCompleted: viewModel.isCompletedToday) {
                 handleCompletionToday()
             }
             
@@ -29,25 +40,19 @@ struct HabitCardView: View {
             RoundedRectangle(cornerRadius: 12)
                 .stroke(Color(#colorLiteral(red: 0.8039215803, green: 0.8039215803, blue: 0.8039215803, alpha: 1)))
         )
-    }
-    
-    // MARK: - Computed Properties
-    var currentFormattedDate: String {
-        Date.now.formatted(date: .numeric, time: .omitted)
-    }
-    
-    var todayHabitEntry: HabitEntry? {
-        viewModel.getHabitEntry(for: habit, on: Date())
-    }
-    
-    var isCompletedToday: Bool {
-        todayHabitEntry?.isCompleted ?? false
+        .onReceive(
+            NotificationCenter.default
+                .publisher(for: .NSManagedObjectContextDidSave)
+        ) { _ in
+            ///Updating data when Core Data changes
+            viewModel.refreshData()
+        }
     }
     
     // MARK: - Actions
     private func handleCompletionToday() {
         withAnimation(.spring(response: 0.3)) {
-            viewModel.completeHabitEntry(for: habit, on: Date())
+            viewModel.handleCompletionToday()
         }
     }
 }
