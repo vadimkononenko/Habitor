@@ -9,63 +9,25 @@ import SwiftUI
 
 struct CompletionListView: View {
     @ObservedObject var habit: Habit
+    @StateObject private var viewModel: CompletionListViewModel
     
+    init(habit: Habit) {
+        self.habit = habit
+        self._viewModel = StateObject(
+            wrappedValue: CompletionListViewModel(habit: habit)
+        )
+    }
+
     var body: some View {
         HStack(spacing: 16) {
-            ForEach(-6..<1) { dayOffset in
+            ForEach(Array(viewModel.completionDays.enumerated()), id: \.offset) { index, day in
                 CompletionItemView(habit: habit,
-                                   date: getDateDaysAgo(dayOffset),
-                                   isCompleted: isCompletedDay(getDateDaysAgo(dayOffset)))
+                                   date: day.date,
+                                   isCompleted: day.isCompleted)
             }
         }
-    }
-}
-
-// MARK: - Views
-extension CompletionListView {
-    @ViewBuilder
-    private func createCompletionItem(dayOffset: Int) -> some View {
-        VStack {
-            Text(getFormattedDate(for: getDateDaysAgo(dayOffset)))
-                .font(.caption2)
-                .fixedSize()
-            
-            RoundedRectangle(cornerRadius: 4)
-                .fill(isCompletedDay(getDateDaysAgo(dayOffset)) ? Color.accentColor : Color.gray.opacity(0.5))
-                .frame(width: 18, height: 18)
+        .onChange(of: habit.entries?.count) { _, _ in
+            viewModel.refreshData()
         }
-    }
-}
-
-// MARK: - Hepler Methods
-extension CompletionListView {
-    private func getDateDaysAgo(_ days: Int) -> Date {
-        let calendar = Calendar.current
-        
-        if let date = calendar.date(
-            byAdding: .day,
-            value: days,
-            to: Date()
-        ) {
-            return date
-        }
-        
-        return Date()
-    }
-    
-    private func getFormattedDate(for date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "d"
-        
-        return formatter.string(from: date)
-    }
-    
-    private func isCompletedDay(_ date: Date) -> Bool {
-        guard let entries = habit.entries else { return false }
-        
-        return entries.first { entry in
-            let entryDate = entry.date
-            return Calendar.current.isDate(entryDate, inSameDayAs: date)
-        }?.isCompleted ?? false
     }
 }
