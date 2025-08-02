@@ -11,15 +11,21 @@ struct HabitDetailView: View {
     
     // MARK: - Variables
     @ObservedObject var habit: Habit
+    @StateObject private var viewModel: HabitDetailViewModel
     
     let columns = Array(repeating: GridItem(.flexible(), spacing: 2), count: 7)
+    
+    init(habit: Habit) {
+        self.habit = habit
+        self._viewModel = StateObject(wrappedValue: HabitDetailViewModel(habit: habit))
+    }
     
     // MARK: - Body
     var body: some View {
         VStack {
             HabitDetailInfoView(title: habit.title,
                                 description: habit.descriptionText,
-                                isCompletedToday: isCompletedDay())
+                                isCompletedToday: viewModel.isCompletedDay(viewModel.selectedDate))
                 .frame(maxWidth: .infinity, alignment: .center)
             
             HabitDetailStatsView(bestStreak: Int(habit.bestStreak),
@@ -27,11 +33,54 @@ struct HabitDetailView: View {
                                  totalCompletions: Int(habit.totalCompletions))
                 .padding(.vertical)
             
+            HStack {
+                Button {
+                    viewModel.previousMonth()
+                } label: {
+                    Image(systemName: "chevron.left")
+                        .font(.title2)
+                        .foregroundColor(.primary)
+                }
+
+                Spacer()
+                
+                Text(viewModel.monthYearFormatter.string(from: viewModel.selectedDate))
+                    .font(.headline)
+                    .fontWeight(.semibold)
+                
+                Spacer()
+                
+                Button {
+                    viewModel.nextMonth()
+                } label: {
+                    Image(systemName: "chevron.right")
+                        .font(.title2)
+                        .foregroundColor(.primary)
+                }
+
+            }
+            .padding(.horizontal)
+            .padding(.bottom)
+            
+            HStack {
+                ForEach(viewModel.weekdaySymbols, id: \.self) { day in
+                    Text(day)
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity)
+                }
+            }
+            .padding(.horizontal)
+            
             //Grid Of Month Days Completions
             LazyVGrid(columns: columns) {
-                ForEach(Array(calendarDays.enumerated()), id: \.offset) { index, day in
-                    CalendarDayView(day: day,
-                                    isCompleted: habitMonthCompletions.contains(day))
+                ForEach(Array(viewModel.calendarDays.enumerated()), id: \.offset) { index, calendarDay in
+                    CalendarDayView(
+                        day: calendarDay.day,
+                        isCompleted: viewModel.isCompletedDay(calendarDay.date),
+                        isCurrentMonth: calendarDay.isCurrentMonth
+                    )
                 }
             }
             .padding(.vertical)
@@ -40,72 +89,17 @@ struct HabitDetailView: View {
         }
         .padding()
     }
-    
-    // MARK: - Calendar Logic
-    private var calendarDays: [Int] {
-        let calendar = Calendar.current
-        let month = Date()
-        
-        let startOfMonth = calendar.dateInterval(of: .month, for: month)?.start ?? month
-        let daysInMonth = calendar.range(of: .day, in: .month, for: month)?.count ?? 30
-        let firstWeekday = calendar.component(.weekday, from: startOfMonth)
-        
-        var days = [Int]()
-        
-        ///Convert format from 1=Sunday => to 0=Monday
-        ///1=Sunday  |  1 + 5 = 6  |   6 % 7 = 6  |   6 -> last in week
-        let mondayBasedWeekday = (firstWeekday + 5) % 7
-        
-        ///Fills empty days before 1th date
-        for _ in 0..<mondayBasedWeekday {
-            days.append(0)
-        }
-        
-        ///Fills month days 1,2,3...31
-        for day in 1...daysInMonth {
-            days.append(day)
-        }
-        
-        return days
-    }
-    
-    private var habitMonthCompletions: [Int] {
-        var completions = [Int]()
-        
-        let habitEntries = habit.entries
-                
-        let filteredCompletedHabitEntriesByMonth = habitEntries?.filter {
-            let calendar = Calendar.current
-            let month = Date()
-            
-            return calendar.isDate($0.date, equalTo: month, toGranularity: .month) && $0.isCompleted
-        }
-        
-        completions = filteredCompletedHabitEntriesByMonth?.compactMap { entry in
-            let calendar = Calendar.current
-            return calendar.component(.day, from: entry.date)
-        } ?? []
-        
-        return completions
-    }
-    
-    private func isCompletedDay(_ date: Date = Date()) -> Bool {
-        guard let entries = habit.entries else { return false }
-        
-        return entries.first { entry in
-            let entryDate = entry.date
-            return Calendar.current.isDate(entryDate, inSameDayAs: date)
-        }?.isCompleted ?? false
-    }
 }
 
 // MARK: - HabitDetailInfoView
 struct HabitDetailInfoView: View {
     
+    // MARK: - Variables
     let title: String
     let description: String?
     let isCompletedToday: Bool
     
+    // MARK: - Body
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
             VStack(alignment: .center) {
@@ -130,10 +124,12 @@ struct HabitDetailInfoView: View {
 // MARK: - HabitDetailStatsView
 struct HabitDetailStatsView: View {
     
+    // MARK: - Variables
     let bestStreak: Int
     let currentStreak: Int
     let totalCompletions: Int
     
+    // MARK: - Body
     var body: some View {
         HStack {
             StatCard(title: "Best streak",
@@ -146,5 +142,28 @@ struct HabitDetailStatsView: View {
                      value: "\(totalCompletions)",
                      subtitle: "Times")
         }
+    }
+}
+
+// MARK: - CalendarDayView
+struct CalendarDayView: View {
+    
+    // MARK: - Variables
+    let day: Int
+    let isCompleted: Bool
+    let isCurrentMonth: Bool
+    
+    // MARK: - Body
+    var body: some View {
+        RoundedRectangle(cornerRadius: 6)
+            .fill(isCurrentMonth ? .accent : .gray.opacity(0.3))
+            .frame(width: 30, height: 30)
+            .opacity(isCompleted ? 1.0 : (isCurrentMonth ? 0.3 : 0.2))
+            .overlay {
+                Text("\(day)")
+                    .font(.caption)
+                    .fontWeight(isCurrentMonth ? .bold : .medium)
+                    .foregroundColor(isCurrentMonth ? .white : .gray)
+            }
     }
 }
