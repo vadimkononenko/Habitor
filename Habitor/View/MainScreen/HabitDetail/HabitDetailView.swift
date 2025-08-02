@@ -9,12 +9,13 @@ import SwiftUI
 
 struct HabitDetailView: View {
     
-    // MARK: - Variables
+    // MARK: - Properties
     @ObservedObject var habit: Habit
     @StateObject private var viewModel: HabitDetailViewModel
     
     let columns = Array(repeating: GridItem(.flexible(), spacing: 2), count: 7)
     
+    // MARK: - Init
     init(habit: Habit) {
         self.habit = habit
         self._viewModel = StateObject(wrappedValue: HabitDetailViewModel(habit: habit))
@@ -33,34 +34,11 @@ struct HabitDetailView: View {
                                  totalCompletions: Int(habit.totalCompletions))
                 .padding(.vertical)
             
-            HStack {
-                Button {
-                    viewModel.previousMonth()
-                } label: {
-                    Image(systemName: "chevron.left")
-                        .font(.title2)
-                        .foregroundColor(.primary)
-                }
-
-                Spacer()
-                
-                Text(viewModel.monthYearFormatter.string(from: viewModel.selectedDate))
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                
-                Spacer()
-                
-                Button {
-                    viewModel.nextMonth()
-                } label: {
-                    Image(systemName: "chevron.right")
-                        .font(.title2)
-                        .foregroundColor(.primary)
-                }
-
-            }
-            .padding(.horizontal)
-            .padding(.bottom)
+            CalendarHeaderView(monthYearText: viewModel.monthYearString,
+                               onPreviousMonth: viewModel.previousMonth,
+                               onNextMonth: viewModel.nextMonth)
+                .padding(.horizontal)
+                .padding(.bottom)
             
             HStack {
                 ForEach(viewModel.weekdaySymbols, id: \.self) { day in
@@ -71,7 +49,6 @@ struct HabitDetailView: View {
                         .frame(maxWidth: .infinity)
                 }
             }
-            .padding(.horizontal)
             
             //Grid Of Month Days Completions
             LazyVGrid(columns: columns) {
@@ -156,14 +133,57 @@ struct CalendarDayView: View {
     // MARK: - Body
     var body: some View {
         RoundedRectangle(cornerRadius: 6)
-            .fill(isCurrentMonth ? .accent : .gray.opacity(0.3))
+            .fill(.accent)
+            .stroke(isCurrentMonth ? Color(#colorLiteral(red: 1, green: 0.6114145707, blue: 0, alpha: 1)) : .gray.opacity(0.0), lineWidth: 3)
             .frame(width: 30, height: 30)
-            .opacity(isCompleted ? 1.0 : (isCurrentMonth ? 0.3 : 0.2))
+            .opacity(isCompleted ? 1.0 : 0.2)
             .overlay {
                 Text("\(day)")
                     .font(.caption)
-                    .fontWeight(isCurrentMonth ? .bold : .medium)
-                    .foregroundColor(isCurrentMonth ? .white : .gray)
+                    .fontWeight(isCurrentMonth ? .bold : .light)
+                    .foregroundColor(isCompleted ? .white : .gray)
             }
+    }
+}
+
+// MARK: - CalendarHeaderView
+struct CalendarHeaderView: View {
+    
+    // MARK: - Properties
+    let monthYearText: String
+    let onPreviousMonth: () -> Void
+    let onNextMonth: () -> Void
+    
+    // MARK: - Body
+    var body: some View {
+        HStack {
+            ///Left Arrow
+            Button {
+                onPreviousMonth()
+            } label: {
+                Image(systemName: "chevron.left")
+                    .font(.title2)
+                    .foregroundColor(.primary)
+            }
+
+            Spacer()
+            
+            ///Month Title
+            Text(monthYearText)
+                .font(.headline)
+                .fontWeight(.semibold)
+            
+            Spacer()
+            
+            ///Right Arrow
+            Button {
+                onNextMonth()
+            } label: {
+                Image(systemName: "chevron.right")
+                    .font(.title2)
+                    .foregroundColor(.primary)
+            }
+
+        }
     }
 }
