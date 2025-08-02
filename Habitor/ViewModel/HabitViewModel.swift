@@ -26,7 +26,7 @@ extension HabitViewModel {
         guard let entries = habit.entries else { return nil }
         
         return entries.first { entry in
-            guard let entryDate = entry.date else { return false }
+            let entryDate = entry.date
             return Calendar.current.isDate(entryDate, inSameDayAs: date)
         }
     }
@@ -142,7 +142,7 @@ extension HabitViewModel {
     }
     
     func deleteHabitEntry(_ habitEntry: HabitEntry) {
-        guard let habit = habitEntry.habit else { return }
+        let habit = habitEntry.habit
             
         habit.removeFromEntries(habitEntry)
         

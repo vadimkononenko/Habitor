@@ -34,8 +34,10 @@ extension Habit {
         let oneWeekAgo = calendar.date(byAdding: .day, value: -7, to: Date()) ?? Date()
         
         return entries.filter { entry in
-            guard let entryDate = entry.date,
-                  entry.isCompleted else { return false }
+            let entryDate = entry.date
+            
+            guard entry.isCompleted else { return false }
+            
             return entryDate >= oneWeekAgo
         }.count
     }
@@ -47,8 +49,10 @@ extension Habit {
         let oneMonthAgo = calendar.date(byAdding: .month, value: -1, to: Date()) ?? Date()
         
         return entries.filter { entry in
-            guard let entryDate = entry.date,
-                  entry.isCompleted else { return false }
+            let entryDate = entry.date
+            
+            guard entry.isCompleted else { return false }
+            
             return entryDate >= oneMonthAgo
         }.count
     }
@@ -58,7 +62,7 @@ extension Habit {
         guard let entries = entries else { return false }
         
         return entries.contains { entry in
-            guard let entryDate = entry.date else { return false }
+            let entryDate = entry.date
             return Calendar.current
                 .isDate(entryDate, inSameDayAs: date) && entry.isCompleted
         }
@@ -68,7 +72,7 @@ extension Habit {
         guard let entries = entries else { return nil }
         
         return entries.first { entry in
-            guard let entryDate = entry.date else { return false }
+            let entryDate = entry.date
             return Calendar.current.isDate(entryDate, inSameDayAs: date)
         }
     }
@@ -94,12 +98,11 @@ extension Habit {
     
     // MARK: - Validation
     var isValid: Bool {
-        guard let title = title?.trimmingCharacters(
-            in: .whitespacesAndNewlines
-        ),
-              !title.isEmpty else { return false }
+        let title = title.trimmingCharacters(in: .whitespacesAndNewlines)
         
-        guard !targetDays.isEmpty else { return false }
+        guard
+            !title.isEmpty, !targetDays.isEmpty
+        else { return false }
         
         return true
     }

@@ -40,6 +40,9 @@ struct MainView: View {
                            showsIndicators: false) {
                     ForEach(habits, id: \.self) { habit in
                         HabitCardView(habit: habit)
+                            .onTapGesture {
+                                navigationPath.append(NavigationDestination.habitDetail(habit))
+                            }
                     }
                     .padding(.horizontal)
                     
@@ -70,7 +73,7 @@ struct MainView: View {
                         .environmentObject(viewModel)
                                     
                 case .habitDetail(let habit):
-                    Text("Detail")
+                    HabitDetailView(habit: habit)
                 }
             }
         }
@@ -90,7 +93,7 @@ extension MainView {
             guard let entries = habit.entries else { return false }
             
             return entries.contains { entry in
-                guard let entryDate = entry.date else { return false }
+                let entryDate = entry.date
                 return Calendar.current.isDate(entryDate, inSameDayAs: today)
             }
         }
@@ -105,7 +108,7 @@ extension MainView {
             guard let entries = habit.entries else { return total }
                     
             let todayEntry = entries.first { entry in
-                guard let entryDate = entry.date else { return false }
+                let entryDate = entry.date
                 return Calendar.current.isDate(entryDate, inSameDayAs: today)
             }
                     

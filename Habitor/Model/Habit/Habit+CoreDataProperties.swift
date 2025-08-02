@@ -25,7 +25,7 @@ extension Habit {
     @NSManaged public var isActive: Bool
     @NSManaged public var reminderTime: Date?
     @NSManaged public var targetDaysData: Data?
-    @NSManaged public var title: String?
+    @NSManaged public var title: String
     @NSManaged public var totalCompletions: Int32
     @NSManaged public var updatedAt: Date?
     @NSManaged public var categories: Set<Category>?

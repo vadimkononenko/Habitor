@@ -64,7 +64,7 @@ extension CompletionListView {
         guard let entries = habit.entries else { return false }
         
         return entries.first { entry in
-            guard let entryDate = entry.date else { return false }
+            let entryDate = entry.date
             return Calendar.current.isDate(entryDate, inSameDayAs: date)
         }?.isCompleted ?? false
     }

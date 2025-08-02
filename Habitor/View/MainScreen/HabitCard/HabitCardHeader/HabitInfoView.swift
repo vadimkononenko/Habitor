@@ -13,7 +13,7 @@ struct HabitInfoView: View {
     var body: some View {
         VStack(alignment: .leading) {
             // Title
-            Text(habit.title ?? "Untitled")
+            Text(habit.title)
                 .font(.headline)
                 .lineLimit(2)
             
