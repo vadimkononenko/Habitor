@@ -136,6 +136,8 @@ extension HabitViewModel {
         
         habit.addToEntries(habitEntry)
         
+        updateHabitStatistics(for: habit)
+        
         coreDataManager.save()
         
         fetchHabits()
@@ -147,6 +149,8 @@ extension HabitViewModel {
         habit.removeFromEntries(habitEntry)
         
         coreDataManager.viewContext.delete(habitEntry)
+        
+        updateHabitStatistics(for: habit)
         
         coreDataManager.save()
         
@@ -203,5 +207,151 @@ extension HabitViewModel {
             print("Error checking category: \(error)")
             return nil
         }
+    }
+}
+
+// MARK: - Statistic Methods
+extension HabitViewModel {
+    func updateHabitStatistics(for habit: Habit) {
+        updateTotalCompletions(for: habit)
+        updateCurrentStreak(for: habit)
+        updateBestStreak(for: habit)
+            
+        habit.updatedAt = Date()
+        coreDataManager.save()
+    }
+    
+    private func updateTotalCompletions(for habit: Habit) {
+        guard let entries = habit.entries else {
+            habit.totalCompletions = 0
+            return
+        }
+        
+        let completedEntries = entries.filter { $0.isCompleted }
+        habit.totalCompletions = Int32(completedEntries.count)
+    }
+    
+    private func updateCurrentStreak(for habit: Habit) {
+        guard let entries = habit.entries else {
+            habit.currentStreak = 0
+            return
+        }
+        
+        let sortedEntries = entries
+            .filter { $0.isCompleted }
+            .sorted { $0.date < $1.date }
+        
+        if sortedEntries.isEmpty {
+            habit.currentStreak = 0
+            return
+        }
+        
+        let calendar = Calendar.current
+        let today = Date()
+        var currentStreak = 0
+        var checkDate = today
+        
+        while true {
+            let weekday = calendar.component(.weekday, from: checkDate)
+            let adjastedWeekday = weekday == 1 ? 7 : weekday - 1
+            
+            if habit.targetDays.contains(adjastedWeekday) {
+                let hasEntryForDate = sortedEntries.contains { entry in
+                    calendar.isDate(entry.date, inSameDayAs: checkDate)
+                }
+                
+                if hasEntryForDate {
+                    currentStreak += 1
+                } else {
+                    break
+                }
+            }
+            
+            guard let previousDay = calendar.date(byAdding: .day, value: -1, to: checkDate) else { break }
+            checkDate = previousDay
+            
+            let firstHabitEntryDate = sortedEntries.last?.date ?? today
+            
+            if calendar.isDate(checkDate, inSameDayAs: firstHabitEntryDate) {
+                break
+            }
+        }
+        
+        habit.currentStreak = Int32(currentStreak)
+//        if currentStreak > habit.bestStreak {
+//            habit.bestStreak = Int32(currentStreak)
+//        }
+    }
+    
+    private func updateBestStreak(for habit: Habit) {
+        guard let entries = habit.entries else {
+            habit.bestStreak = 0
+            return
+        }
+        
+        let sortedEntries = entries
+            .filter { $0.isCompleted }
+            .sorted { $0.date < $1.date }
+        
+        if sortedEntries.isEmpty {
+            habit.bestStreak = 0
+            return
+        }
+        
+        let calendar = Calendar.current
+        var maxStreak = 0
+        var currentStreakCount = 0
+        var lastDate: Date?
+        
+        for entry in sortedEntries {
+            let entryDate = entry.date
+            
+            if let lastDate {
+                if isNextTargetDay(from: lastDate,
+                                   to: entryDate,
+                                   targetDays: habit.targetDays,
+                                   calendar: calendar) {
+                    currentStreakCount += 1
+                } else {
+                    maxStreak = max(maxStreak, currentStreakCount)
+                    currentStreakCount = 1
+                }
+            } else {
+                currentStreakCount = 1
+            }
+            
+            lastDate = entryDate
+        }
+        
+        maxStreak = max(maxStreak, currentStreakCount)
+        habit.bestStreak = Int32(maxStreak)
+    }
+    
+    private func isNextTargetDay(from fromDate: Date, to toDate: Date, targetDays: [Int], calendar: Calendar) -> Bool {
+        var checkDate = fromDate
+            
+        while checkDate < toDate {
+            guard let nextDay = calendar.date(byAdding: .day, value: 1, to: checkDate) else {
+                return false
+            }
+            checkDate = nextDay
+                
+            let weekday = calendar.component(.weekday, from: checkDate)
+            let adjustedWeekday = weekday == 1 ? 7 : weekday - 1
+                
+            if targetDays.contains(adjustedWeekday) {
+                return calendar.isDate(checkDate, inSameDayAs: toDate)
+            }
+        }
+            
+        return false
+    }
+    
+    func getHabitStatistics(for habit: Habit) -> (bestStreak: Int, currentStreak: Int, totalCompletions: Int) {
+        return (
+            bestStreak: Int(habit.bestStreak),
+            currentStreak: Int(habit.currentStreak),
+            totalCompletions: Int(habit.totalCompletions)
+        )
     }
 }

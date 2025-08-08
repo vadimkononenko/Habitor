@@ -9,9 +9,11 @@ import SwiftUI
 
 struct HabitDetailView: View {
     
+    @EnvironmentObject private var habitViewModel: HabitViewModel
+    @StateObject private var viewModel: HabitDetailViewModel
+    
     // MARK: - Properties
     @ObservedObject var habit: Habit
-    @StateObject private var viewModel: HabitDetailViewModel
     
     let columns = Array(repeating: GridItem(.flexible(), spacing: 2), count: 7)
     
@@ -65,6 +67,9 @@ struct HabitDetailView: View {
             Spacer()
         }
         .padding()
+        .onAppear {
+            habitViewModel.updateHabitStatistics(for: habit)
+        }
     }
 }
 
