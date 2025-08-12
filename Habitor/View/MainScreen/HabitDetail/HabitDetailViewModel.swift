@@ -195,6 +195,27 @@ class HabitDetailViewModel: ObservableObject {
             calendar.isDate(entry.date, inSameDayAs: date)
         }?.isCompleted ?? false
     }
+    
+    func canToggleDate(_ date: Date) -> Bool {
+        let calendar = Calendar.current
+        let today = Date()
+            
+        // Проверяем, что дата не в будущем
+        guard calendar
+            .compare(date, to: today, toGranularity: .day) != .orderedDescending else {
+            return false
+        }
+            
+        // Проверяем, что дата не раньше создания привычки
+        if let creationDate = habit.createdAt {
+            guard calendar
+                .compare(date, to: creationDate, toGranularity: .day) != .orderedAscending else {
+                return false
+            }
+        }
+            
+        return true
+    }
         
     var monthYearFormatter: DateFormatter {
         let formatter = DateFormatter()

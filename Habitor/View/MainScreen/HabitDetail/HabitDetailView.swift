@@ -60,6 +60,11 @@ struct HabitDetailView: View {
                         isCompleted: viewModel.isCompletedDay(calendarDay.date),
                         isCurrentMonth: calendarDay.isCurrentMonth
                     )
+                    .onTapGesture {
+                        if viewModel.canToggleDate(calendarDay.date) {
+                            habitViewModel.completeHabitEntry(for: habit, on: calendarDay.date)
+                        }
+                    }
                 }
             }
             .padding(.vertical)
@@ -70,6 +75,25 @@ struct HabitDetailView: View {
         .onAppear {
             habitViewModel.updateHabitStatistics(for: habit)
         }
+    }
+    
+    private func isDateClickable(_ date: Date, habitCreationDate: Date?) -> Bool {
+        let calendar = Calendar.current
+        let today = Date()
+        
+        guard calendar
+            .compare(date, to: today, toGranularity: .day) != .orderedDescending else {
+            return false
+        }
+        
+        if let creationDate = habitCreationDate {
+            guard calendar
+                .compare(date, to: creationDate, toGranularity: .day) != .orderedAscending else {
+                return false
+            }
+        }
+        
+        return true
     }
 }
 
@@ -148,6 +172,25 @@ struct CalendarDayView: View {
                     .fontWeight(isCurrentMonth ? .bold : .light)
                     .foregroundColor(isCompleted ? .white : .gray)
             }
+    }
+    
+    private var notTodayLabelView: some View {
+        Text("\(day)")
+            .font(.caption)
+            .fontWeight(isCurrentMonth ? .bold : .light)
+            .foregroundColor(isCompleted ? .white : .gray)
+    }
+    
+    private var todayLabelView: some View {
+        RoundedRectangle(cornerRadius: 5)
+            .fill(.white)
+            .overlay {
+                Text("\(day)")
+                    .font(.caption)
+                    .fontWeight(.bold)
+                    .foregroundColor(.accent)
+            }
+            .padding(3)
     }
 }
 

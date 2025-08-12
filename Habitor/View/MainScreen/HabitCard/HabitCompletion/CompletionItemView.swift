@@ -11,7 +11,6 @@ struct CompletionItemView: View {
     @EnvironmentObject private var viewModel: HabitViewModel
     
     var habit: Habit
-    
     var date: Date
     var isCompleted: Bool
     

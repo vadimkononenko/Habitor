@@ -43,6 +43,9 @@ struct MainView: View {
                             .onTapGesture {
                                 navigationPath.append(NavigationDestination.habitDetail(habit))
                             }
+                            .onChange(of: habit) { oldValue, newValue in
+                                viewModel.updateHabitStatistics(for: habit)
+                            }
                     }
                     .padding(.horizontal)
                     

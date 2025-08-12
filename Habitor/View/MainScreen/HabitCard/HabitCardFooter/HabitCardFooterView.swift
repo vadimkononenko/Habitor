@@ -9,7 +9,7 @@ import SwiftUI
 
 struct HabitCardFooterView: View {
     // MARK: - Properties
-    let habit: Habit
+    @ObservedObject var habit: Habit
     
     // MARK: - Body
     var body: some View {
